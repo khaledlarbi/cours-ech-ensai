@@ -26,32 +26,6 @@ format:
 
 ---
 
-# Motivation : le plan poissonien
-
-- Le **tirage poissonien** : chaque unité \( k \) est tirée indépendamment avec probabilité \( \pi_k \).
-- Avantage : simple, probabilités d’inclusion maîtrisées.
-- Inconvénient majeur : la **taille de l’échantillon est variable**.
-- Peut produire des échantillons déséquilibrés (aléa important).
-
----
-
-
----
-title: "Plans équilibrés en sondage"
-format: revealjs
-revealjs-theme: simple
----
-
-# Introduction
-
-- Dans de nombreuses enquêtes, il est souhaitable de respecter certaines **contraintes auxiliaires** (ex: répartition régionale, catégories socio-professionnelles).
-- Objectif : obtenir un **échantillon équilibré** sur ces variables.
-- Les plans équilibrés permettent :
-  - une **meilleure précision** des estimateurs,
-  - tout en conservant une **taille fixe**,
-  - et une **probabilité d'inclusion donnée**.
-
----
 
 # Motivation : le plan poissonien
 
@@ -92,9 +66,9 @@ revealjs-theme: simple
 
 Un échantillon est **équilibré** sur $\mathbf{x}$ si :
 
-\[
+$$
 \sum_{k \in s} \frac{\mathbf{x}_k}{\pi_k} = \sum_{k \in U} \mathbf{x}_k
-\]
+$$
 
 ---
 
@@ -133,19 +107,19 @@ Objectif : construire un vecteur $\mathbf{v} \in \{0,1\}^N$ tel que :
 
 1. Choisir un **sous-ensemble actif** de taille $q$ (généralement $q = p+1$).
 2. Calculer une direction $\mathbf{u}$ telle que :
-\[
+$$
 X_A^T \mathbf{u} = 0
-\]
+$$
 ou $X_A$ est la sous-matrice correspondant aux unités actives.
 3. Trouver les pas $\lambda_+$ et $\lambda_-$ pour rester dans $[0,1]$ :
-\[
+$$
 \lambda_+ = \min_{u_i > 0} \frac{1 - \pi_i}{u_i}, \quad
 \lambda_- = \min_{u_i < 0} \frac{\pi_i}{-u_i}
-\]
+$$
 4. Choisir aléatoirement $+\lambda_+$ ou $-\lambda_-$, puis mettre à jour :
-\[
+$$
 \pi \leftarrow \pi \pm \lambda \mathbf{u}
-\]
+$$
 
 ---
 
