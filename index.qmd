@@ -1,0 +1,60 @@
+---
+title: "Techniques d'échantillonnage avancées"
+format: html
+---
+
+Date : Septembre 2025
+
+Salle : **Ensai** 
+
+Enseignant : Khaled Larbi (`prenom point nom arobase live point fr`)
+
+------------------------------------------------------------------------
+
+
+
+# Bienvenue
+
+
+#### Objectifs du cours
+
+Ce cours est une introduction à l'estimation dans un contexte de sondage. 
+
+
+#### Pré-requis
+
+-   Connaissance en R.
+- Maîtrise des bases des probabilités.
+-   Connaître les concepts élémentaires de statistiques inférentielles (estimateur, biais, variance ...).
+-   Connaître les bases de la régression linéaire multiple et de la régression logistique. 
+
+#### Référence 
+
+::: {#refs}
+
+- @sondageTille
+
+:::
+
+#### Evaluation 
+
+L'évaluation se fera en deux temps :
+
+
+#### Calendrier (prévisionnel)
+
+Des coquilles peuvent être cachées dans les documents : n'hésitez pas à le notifier par mail. 
+
+
+#### Enregistrement au format pdf
+
+Les présentations sont disponibles au format `html`. Cependant, ce format n'est pas le plus optimisé pour l'annotation. 
+Il est possible d'enregistrer au format `pdf` en : 
+
+- utilisant Google Chrome.
+- appuyant sur la touche `e` de votre clavier lorsque vous êtes sur la présentation.
+- appuyant sur la combinaison `CTRL + P` et en enregistrant au format `pdf`.
+
+![Transformation de `html` vers `pdf`](illustration_site/html_to_pdf.gif)
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />Ce(tte) œuvre est mise à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Licence Creative Commons Attribution - Pas d’Utilisation Commerciale - Partage dans les Mêmes Conditions 4.0 International</a>.
