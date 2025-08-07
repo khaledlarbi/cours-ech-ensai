@@ -1,0 +1,219 @@
+---
+title: "Tirage équilibré"
+author: "Khaled Larbi"
+lang: fr
+date: 9/25/2025
+date-format: "DD MMM YYYY"
+format: 
+    clean-revealjs:
+        transition: slide
+        smaller: true
+        preview-links: true
+        width: 1500
+        margin: 0.05
+        toc: false
+        vertical: false
+---
+
+# Introduction
+
+- Dans de nombreuses enquêtes, il est souhaitable de respecter certaines **contraintes auxiliaires** (ex: répartition régionale, catégories socio-pro).
+- Objectif : obtenir un **échantillon équilibré** sur ces variables.
+- Les plans équilibrés permettent :
+  - une **meilleure précision** des estimateurs,
+  - tout en conservant une **taille fixe**,
+  - et une **probabilité d'inclusion donnée**.
+
+---
+
+# Motivation : le plan poissonien
+
+- Le **tirage poissonien** : chaque unité \( k \) est tirée indépendamment avec probabilité \( \pi_k \).
+- Avantage : simple, probabilités d’inclusion maîtrisées.
+- Inconvénient majeur : la **taille de l’échantillon est variable**.
+- Peut produire des échantillons déséquilibrés (aléa important).
+
+---
+
+
+---
+title: "Plans équilibrés en sondage"
+format: revealjs
+revealjs-theme: simple
+---
+
+# Introduction
+
+- Dans de nombreuses enquêtes, il est souhaitable de respecter certaines **contraintes auxiliaires** (ex: répartition régionale, catégories socio-professionnelles).
+- Objectif : obtenir un **échantillon équilibré** sur ces variables.
+- Les plans équilibrés permettent :
+  - une **meilleure précision** des estimateurs,
+  - tout en conservant une **taille fixe**,
+  - et une **probabilité d'inclusion donnée**.
+
+---
+
+# Motivation : le plan poissonien
+
+- Le **tirage poissonien** : chaque unité $k$ est tirée indépendamment avec probabilité $\pi_k$.
+- Avantage : simple, probabilités d’inclusion maîtrisées.
+- Inconvénient majeur : la **taille de l’échantillon est variable**.
+- Peut produire des échantillons déséquilibrés (aléa important).
+
+---
+
+# Le tirage réjectif
+
+- Objectif : combiner les avantages du plan poissonien avec une **taille fixe**.
+
+## Méthode
+
+1. Tirer un échantillon selon le plan poissonien.
+2. **Rejeter** l’échantillon si sa taille $\neq n$, recommencer sinon.
+
+---
+
+## Analyse du tirage réjectif
+
+- Plan à **taille fixe**.
+- Maintient les probabilités d'inclusion initiales **approximativement**.
+- Peut être **inefficace** si la variance de la taille poissonienne est élevée.
+- Ne garantit pas l’équilibre sur des variables auxiliaires.
+
+---
+
+# Vers les plans équilibrés
+
+- Idée : construire un plan de sondage de taille fixe, respectant :
+  - les **probabilités d’inclusion** $\pi_k$,
+  - un **équilibre exact ou approximatif** sur un vecteur de variables auxiliaires $\mathbf{x}_k \in \mathbb{R}^p$.
+
+## Définition
+
+Un échantillon est **équilibré** sur $\mathbf{x}$ si :
+
+\[
+\sum_{k \in s} \frac{\mathbf{x}_k}{\pi_k} = \sum_{k \in U} \mathbf{x}_k
+\]
+
+---
+
+## Avantages
+
+- Meilleure **représentativité** sur les variables auxiliaires.
+- Moindre **variance** des estimateurs Horvitz-Thompson.
+- Compatible avec la **taille fixe**.
+
+---
+
+# L'algorithme du cube (Deville & Tillé, 2004)
+
+## Idée générale
+
+Tirer un échantillon de taille fixe et équilibré en procédant par **réduction progressive** de la population.
+
+- Étapes :
+  1. Phase de **vol** (*balancing flight*) : maintenir l’équilibre.
+  2. Phase d’**atterrissage** : forcer les inclusions à 0 ou 1.
+
+---
+
+## Entrées de l'algorithme
+
+- $\pi = (\pi_1, \ldots, \pi_N)$ : vecteur des probabilités d’inclusion.
+- $X \in \mathbb{R}^{N \times p}$ : matrice des variables auxiliaires.
+
+Objectif : construire un vecteur $\mathbf{v} \in \{0,1\}^N$ tel que :
+- $\mathbb{E}(v_k) = \pi_k$,
+- $\sum_{k} \frac{v_k x_k}{\pi_k} = \sum_{k} x_k$.
+
+---
+
+## Phase de vol – étape élémentaire
+
+1. Choisir un **sous-ensemble actif** de taille $q$ (généralement $q = p+1$).
+2. Calculer une direction $\mathbf{u}$ telle que :
+\[
+X_A^T \mathbf{u} = 0
+\]
+ou $X_A$ est la sous-matrice correspondant aux unités actives.
+3. Trouver les pas $\lambda_+$ et $\lambda_-$ pour rester dans $[0,1]$ :
+\[
+\lambda_+ = \min_{u_i > 0} \frac{1 - \pi_i}{u_i}, \quad
+\lambda_- = \min_{u_i < 0} \frac{\pi_i}{-u_i}
+\]
+4. Choisir aléatoirement $+\lambda_+$ ou $-\lambda_-$, puis mettre à jour :
+\[
+\pi \leftarrow \pi \pm \lambda \mathbf{u}
+\]
+
+---
+
+## Phase d’atterrissage
+
+- Quand il reste moins de $p+1$ unités actives, on ne peut plus équilibrer exactement.
+- On effectue un **tirage conditionné** pour arrondir les dernières valeurs vers 0 ou 1, tout en conservant une forme d'équilibre local.
+
+---
+
+## Résultat de l’algorithme
+
+- Un vecteur $v \in \{0,1\}^N$ représentant l’échantillon tiré.
+- Le plan de sondage résultant est :
+  - **à taille fixe**,
+  - **équilibré** (ou presque),
+  - conforme aux **probabilités d'inclusion**.
+
+---
+
+# Exemple illustratif
+
+```r
+library(sampling)
+
+# Données simulées
+set.seed(123)
+N <- 6
+x <- data.frame(region = c(1, 1, 2, 2, 3, 3))
+X <- model.matrix(~ region, data = x)[,-1]  # Variables auxiliaires (2 colonnes)
+pi <- rep(3/N, N)  # Probabilités d'inclusion
+
+# Tirage par la méthode du cube
+s <- cube(X = X, pik = pi)
+print(s)  # vecteur d'inclusion 0/1
+```
+
+---
+
+# Illustration géométrique
+
+(Diagrammes SVG à insérer ici, représentant un cube avec déplacement de $\pi$ dans l'espace des contraintes. Chaque étape de l'algorithme modifie légèrement $\pi$ en conservant l'équilibre.)
+
+---
+
+# Estimation de variance
+
+- Soit $\hat{t}_y = \sum_{k \in s} \frac{y_k}{\pi_k}$ l’estimateur de Horvitz-Thompson.
+- Sous un plan équilibré, une estimation approximative de sa variance est :
+
+\[
+\hat{V}(\hat{t}_y) = \sum_{k \in U} \left(1 - \pi_k\right) \left(\frac{y_k}{\pi_k}\right)^2
+\]
+
+- Cette formule est valide **en approximation** (car le plan n’est pas exactement à second ordre connu).
+- Des méthodes plus fines existent par linéarisation ou bootstrap.
+
+---
+
+# Conclusion
+
+- Les plans équilibrés permettent de mieux exploiter les **informations auxiliaires**.
+- L’**algorithme du cube** est une méthode élégante et efficace pour les construire.
+- Il est utilisé dans de nombreux instituts statistiques, notamment pour les enquêtes avec pondération.
+
+---
+
+# Pour aller plus loin
+
+- Deville, J.-C., & Tillé, Y. (2004). *Efficient balanced sampling: The cube method*. Biometrika, 91(4), 893-912.
+- Tillé, Y. (2020). *Sampling and Estimation from Finite Populations*. Wiley.

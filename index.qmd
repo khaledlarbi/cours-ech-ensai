@@ -28,6 +28,10 @@ Ce cours est une introduction à l'estimation dans un contexte de sondage.
 -   Connaître les concepts élémentaires de statistiques inférentielles (estimateur, biais, variance ...).
 -   Connaître les bases de la régression linéaire multiple et de la régression logistique. 
 
+#### Cours
+
+Cours sur l'équilibrage : [equilibrage](cours/equilibrage/cours.qmd)
+
 #### Référence 
 
 ::: {#refs}
