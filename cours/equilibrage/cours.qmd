@@ -6,61 +6,196 @@ date: 9/25/2025
 date-format: "DD MMM YYYY"
 format: 
     clean-revealjs:
-        transition: slide
-        smaller: true
-        preview-links: true
-        width: 1500
-        margin: 0.05
-        toc: false
-        vertical: false
+        math:
+            renderer: katex
+            scale: 0.75
+            output: svg
 ---
 
 # Introduction
 
-- Dans de nombreuses enquêtes, il est souhaitable de respecter certaines **contraintes auxiliaires** (ex: répartition régionale, catégories socio-pro).
-- Objectif : obtenir un **échantillon équilibré** sur ces variables.
-- Les plans équilibrés permettent :
-  - une **meilleure précision** des estimateurs,
-  - tout en conservant une **taille fixe**,
-  - et une **probabilité d'inclusion donnée**.
+## Plans aléatoire simple sans remise, poissonien ...
 
----
+::: {.fragment}
+- La plan aléatoire simple sans remise :
+    - Plan de taille fixe;
+    - Estimation sans biais de la variance de $\hat{t}_{y,\text{HT}}$
+    - Pas de choix des probabilités d'inclusion;
+:::
+
+::: {.fragment}
+Solution : Stratification pour prendre en compte de l'information auxiliaire.
+:::
 
 
-# Motivation : le plan poissonien
+## Plans aléatoire simple sans remise, poissonien ...
 
-- Le **tirage poissonien** : chaque unité $k$ est tirée indépendamment avec probabilité $\pi_k$.
-- Avantage : simple, probabilités d’inclusion maîtrisées.
-- Inconvénient majeur : la **taille de l’échantillon est variable**.
-- Peut produire des échantillons déséquilibrés (aléa important).
+::: {.fragment}
+- La tirage systématique :
+    - ✅ : Plan de taille fixe;
+    - ✅ : Choix des probabilités d'inclusion;
+    - ❌ : Pas d'estimation sans biais de la variance de $\hat{t}_{y,\text{HT}}$
+:::
 
----
+::: {.fragment}
+Solution : Utilisation d'approximation
+:::
 
-# Le tirage réjectif
+
+## Plans aléatoire simple sans remise, poissonien ...
+
+::: {.fragment}
+- La tirage systématique :
+    - ✅ : Plan de taille fixe;
+    - ✅ : Choix des probabilités d'inclusion;
+    - ❌ : Pas d'estimation sans biais de la variance de $\hat{t}_{y,\text{HT}}$
+:::
+
+::: {.fragment}
+Solution : Utilisation d'approximation
+:::
+
+
+## Plans aléatoire simple sans remise, poissonien ...
+
+::: {.fragment}
+- La tirage systématique :
+    - ✅ : Choix des probabilités d'inclusion;
+    - ✅ : Pas d'estimation sans biais de la variance de $\hat{t}_{y,\text{HT}}$
+    - ❌ : Plan de taille fixe;
+:::
+
+::: {.fragment}
+Solution : 
+    - Utilisation du **tirage réjectif**
+:::
+
+
+
+## Le tirage réjectif (ou poissonien conditionnel)
+
 
 - Objectif : combiner les avantages du plan poissonien avec une **taille fixe**.
 
-## Méthode
 
-1. Tirer un échantillon selon le plan poissonien.
-2. **Rejeter** l’échantillon si sa taille $\neq n$, recommencer sinon.
+::: {.callout-tip #alg:rej title="Algorithme : Idée du tirage réjectif"}
+- Tirer un échantillon selon le plan poissonien.
+- **Rejeter** l’échantillon si sa taille $\neq n$, recommencer sinon.
+:::
 
----
 
-## Analyse du tirage réjectif
 
-- Plan à **taille fixe**.
-- Maintient les probabilités d'inclusion initiales **approximativement**.
-- Peut être **inefficace** si la variance de la taille poissonienne est élevée.
-- Ne garantit pas l’équilibre sur des variables auxiliaires.
+## Exemple de tirage réjectif
 
----
+- $U = \{1;2;3\}$
+- $p_1 = p_2 = \frac{3}{5}$ et $p_3 = $\frac{4}{5}$
+- On souhaite un échantillon $S$ de taille 2.
 
-# Vers les plans équilibrés
+- Premier tirage : $s_1 = \{1\}$
+- Deuxième tirage : $s_2 =  \{1;2;3\}$
+- Troisième tirage : $s_3 = \{2;3\}$
 
-- Idée : construire un plan de sondage de taille fixe, respectant :
-  - les **probabilités d’inclusion** $\pi_k$,
-  - un **équilibre exact ou approximatif** sur un vecteur de variables auxiliaires $\mathbf{x}_k \in \mathbb{R}^p$.
+## Tirage réjectif
+
+- On considère un plan poissonien $\text{p}_\text{Poisson}(p_1, ..., p_N)$
+- L'échantillon $S$ est tiré selon un plan réjectif $\text{p}_\text{rejectif}(p_1, ..., p_N; n)$ de taille $n$ associé au plan $\text{p}_\text{Poisson}(p_1, ..., p_N)$ si 
+$$\mathbb{P}(S = s) = \frac{1}{C} \prod_{k \in s} p_k \prod_{k \notin s} (1-p_k) \mathbb{1}_{n(S) = n}$$  où 
+$C = \sum_{s \subset U} \prod_{k \in s} p_k \prod_{k \notin s} (1-p_k) \mathbb{1}_{n(S) = n}$
+
+- La distribution d'un plan réjectif de taille $n$ peut être apprehéndée comme la distribution $S|n(S) = n$ où $S \sim \text{p}_\text{Poisson}(p_1, ..., p_N)$.
+
+## Algorithme de tirage sous la plan réjectif
+
+- L'[algorithme de tirage réjectif](#alg:rej) permet de tirer sous un plan réjectif.
+
+
+
+
+
+## Probabilité d'inclusion d'un plan réjectif
+
+- Est-ce que les probabilités d'inclusion sont respectées pour le plan rejectif ? 
+
+- Est-ce que pour tout $k \in U$, 
+$$\pi_k = \mathbb{P}(k \in S) = p_k \text{ si } S \sim \text{p}_\text{rejectif}(p_1, ..., p_N; n)$ 
+
+
+## Comparaison sur un exemple simple
+
+- $U = \{1;2;3\}$
+- $p_1 = p_2 = \frac{3}{5}$ et $p_3 = $\frac{4}{5}$
+- On souhaite un échantillon $S$ de taille 2.
+
+Quelle est la probabilité d'inclusion de l'individu 1 si $S \sim \text{p}_\text{rejectif}(p_1, p_2, p_3; 2)$ ? 
+
+- Calcul de la fonction de masse de $S$ :
+    - $\mathbb{P}(S = \{1; 2\}) = \frac{9}{125} \times \frac{25}{57}$
+    - $\mathbb{P}(S = \{1; 3\}) = \frac{24}{125} \times \frac{125}{57}$
+    - $\mathbb{P}(S = \{2; 3\}) = \frac{24}{125} \times \frac{125}{57}$
+
+
+- $\mathbb{P}(1 \in S) = \frac{9}{57} + \frac{24}{57} = \frac{11}{19} \neq \frac{3}{5}$
+
+
+## Probabilité d'inclusion d'un plan réjectif
+
+- Est-ce que pour tout $k \in U$, 
+$$\pi_k = \mathbb{P}(k \in S) = p_k \text{ si } S \sim \text{p}_\text{rejectif}(p_1, ..., p_N; n)$$
+    - Non ...
+
+- Il existe des relations de récurrence permettant de calculer \pi_k$ à partir de $p_k$ (et inversement -  @chen2000conditional, @deville2000note, @tille2006sampling).
+
+- Idée de la preuve : relation de récurrence basée sur la distribution de $n(S)$.
+
+## Estimation de la variance sous un plan réjectif
+
+- Comment estimer la variance sous un plan réjectif ? 
+
+- Plan de taille fixe : utilisation possible de l'estimateur de Sen-Yates-Grundy.
+
+- Il est nécessaire de connaître les probabilités d'ordre 2.
+
+- @hajek1964rejective montre que si le plan poissonien associé au plan réjectif considéré est très *aléatoire* alors les probabilités d'inclusion d'ordre 2 peuvent être approximées. 
+
+- Plus formellement, 
+$$\pi_{i j}=\pi_i \pi_j\left[1-\frac{\left(1-\pi_i\right)\left(1-\pi_j\right)}{d}+o\left(\frac{1}{d}\right)\right]$$ lorsque $d \to \infty$ où $\displaystyle d = \sum_{k \in U} {\pi_k} (1 - \pi_k)$.
+
+## Estimation de la variance sous un plan réjectif
+
+D'où l'approximation, pour tout $(i,j) \in U$ avec $i \neq j$,
+$$\Delta_{ij} = \pi_{ij} - \pi_i \pi_j = 1-d^{-1}\left(1-\pi_i\right)\left(1-\pi_j\right)+o\left(d^{-1}\right)$$
+
+- Utilisation de l'estimateur de Sen-Yates-Grundy  :
+\begin{align*}
+\widehat{\mathbb{V}}_{\mathrm{SYG}}(\hat t_{y,\mathrm{HT}})
+&= -\tfrac{1}{2}\sum_{k\in\mathcal{S}}\sum_{\substack{l\in\mathcal{S}\\ l\neq k}}
+\left(\frac{y_k}{\pi_k}-\frac{y_l}{\pi_l}\right)^2 \frac{\Delta_{kl}}{\pi_{kl}} \\[6pt]
+&= \frac{n}{n-1}\sum_{k\in S}\bigl(1-\pi_k\bigr)\left(\frac{y_k}{\pi_k}-\widehat{R}\right)^2 \text{où}
+\widehat{R}=\frac{\displaystyle\sum_{k\in S}\frac{y_k}{\pi_k}\bigl(1-\pi_k\bigr)}
+{\displaystyle\sum_{k\in S}\bigl(1-\pi_k\bigr)}.
+\end{align*}
+
+## Efficacité de l'algorithme de tirage
+
+- Supposons que $S \sim \text{p}_\text{rejectif}(p, ..., p; n)$ où $p \in [0, 1]$.
+
+::: {.callout-tip #alg:rej title="Algorithme : Idée du tirage réjectif"}
+- Tirer un échantillon selon le plan poissonien.
+- **Rejeter** l’échantillon si sa taille $\neq n$, recommencer sinon.
+:::
+
+- Le nombre de tirage $T$ selon le plan poissonien nécessaire pour obtenir un plan de taille $n$ suit une loi géométrique de 
+paramètre $\binom{N}{n} p^n (1-p)^{N-n}$.
+
+- Le nombre moyen de tirages nécessaires pour obtenir un plan de taille $n$ est  $\frac{1}{\binom{N}{n} p^n (1-p)^{N-n}}$.
+
+- Minimisation en $p^* = \frac{n}{N}$
+
+## Vers les plans équilibrés
+
+-   Idée : construire un plan de sondage de taille fixe, respectant :
+    -   les **probabilités d’inclusion** $\pi_k$,
+    -   un **équilibre exact ou approximatif** sur un vecteur de variables auxiliaires $\mathbf{x}_k \in \mathbb{R}^p$.
 
 ## Définition
 
@@ -70,79 +205,87 @@ $$
 \sum_{k \in s} \frac{\mathbf{x}_k}{\pi_k} = \sum_{k \in U} \mathbf{x}_k
 $$
 
----
 
 ## Avantages
 
-- Meilleure **représentativité** sur les variables auxiliaires.
-- Moindre **variance** des estimateurs Horvitz-Thompson.
-- Compatible avec la **taille fixe**.
+-   Meilleure **représentativité** sur les variables auxiliaires.
+-   Moindre **variance** des estimateurs Horvitz-Thompson.
+-   Compatible avec la **taille fixe**.
 
----
 
-# L'algorithme du cube (Deville & Tillé, 2004)
+
+## L'algorithme du cube (Deville & Tillé, 2004)
 
 ## Idée générale
 
 Tirer un échantillon de taille fixe et équilibré en procédant par **réduction progressive** de la population.
 
-- Étapes :
-  1. Phase de **vol** (*balancing flight*) : maintenir l’équilibre.
-  2. Phase d’**atterrissage** : forcer les inclusions à 0 ou 1.
+-   Étapes :
+    1.  Phase de **vol** (*balancing flight*) : maintenir l’équilibre.
+    2.  Phase d’**atterrissage** : forcer les inclusions à 0 ou 1.
 
----
 
+## Tests illustrations
+
+```{r}
+print(getwd())
+source("../../illustrations/equilibrage/methode_cube.R")
+
+p1 <- c(2/3, 2/3, 2/3)
+q1 <- c(0.1, -0.2, 0.3)
+q2 <- c(-0.3, 0.4, 0)
+q3 <- c(0.2, 0.1, -0.1)
+
+# Vecteur normal du plan
+plane_normal <- c(1, 1, 1)
+
+f <- plot_cube_plan_vecteurs(p1, list(q1, q2, q3), plane_normal)
+f
+```
 ## Entrées de l'algorithme
 
-- $\pi = (\pi_1, \ldots, \pi_N)$ : vecteur des probabilités d’inclusion.
-- $X \in \mathbb{R}^{N \times p}$ : matrice des variables auxiliaires.
+-   $\pi = (\pi_1, \ldots, \pi_N)$ : vecteur des probabilités d’inclusion.
+-   $X \in \mathbb{R}^{N \times p}$ : matrice des variables auxiliaires.
 
-Objectif : construire un vecteur $\mathbf{v} \in \{0,1\}^N$ tel que :
-- $\mathbb{E}(v_k) = \pi_k$,
-- $\sum_{k} \frac{v_k x_k}{\pi_k} = \sum_{k} x_k$.
+Objectif : construire un vecteur $\displaystyle \mathbf{v} \in \{0,1\}^N$ tel que : - $\mathbb{E}(v_k) = \pi_k$, - $\displaystyle \sum_{k} \frac{v_k x_k}{\pi_k} = \sum_{k} x_k$.
 
----
 
 ## Phase de vol – étape élémentaire
 
-1. Choisir un **sous-ensemble actif** de taille $q$ (généralement $q = p+1$).
-2. Calculer une direction $\mathbf{u}$ telle que :
-$$
-X_A^T \mathbf{u} = 0
-$$
-ou $X_A$ est la sous-matrice correspondant aux unités actives.
-3. Trouver les pas $\lambda_+$ et $\lambda_-$ pour rester dans $[0,1]$ :
-$$
-\lambda_+ = \min_{u_i > 0} \frac{1 - \pi_i}{u_i}, \quad
-\lambda_- = \min_{u_i < 0} \frac{\pi_i}{-u_i}
-$$
-4. Choisir aléatoirement $+\lambda_+$ ou $-\lambda_-$, puis mettre à jour :
-$$
-\pi \leftarrow \pi \pm \lambda \mathbf{u}
-$$
+1.  Choisir un **sous-ensemble actif** de taille $q$ (généralement $q = p+1$).
+2.  Calculer une direction $\mathbf{u}$ telle que : $$
+    X_A^T \mathbf{u} = 0
+    $$ ou $X_A$ est la sous-matrice correspondant aux unités actives.
+3.  Trouver les pas $\lambda_+$ et $\lambda_-$ pour rester dans $[0,1]$ : $$
+    \lambda_+ = \min_{u_i > 0} \frac{1 - \pi_i}{u_i}, \quad
+    \lambda_- = \min_{u_i < 0} \frac{\pi_i}{-u_i}
+    $$
+4.  Choisir aléatoirement $+\lambda_+$ ou $-\lambda_-$, puis mettre à jour : $$
+    \pi \leftarrow \pi \pm \lambda \mathbf{u}
+    $$
 
----
+------------------------------------------------------------------------
 
 ## Phase d’atterrissage
 
-- Quand il reste moins de $p+1$ unités actives, on ne peut plus équilibrer exactement.
-- On effectue un **tirage conditionné** pour arrondir les dernières valeurs vers 0 ou 1, tout en conservant une forme d'équilibre local.
+-   Quand il reste moins de $p+1$ unités actives, on ne peut plus équilibrer exactement.
+-   On effectue un **tirage conditionné** pour arrondir les dernières valeurs vers 0 ou 1, tout en conservant une forme d'équilibre local.
 
----
+------------------------------------------------------------------------
 
 ## Résultat de l’algorithme
 
-- Un vecteur $v \in \{0,1\}^N$ représentant l’échantillon tiré.
-- Le plan de sondage résultant est :
-  - **à taille fixe**,
-  - **équilibré** (ou presque),
-  - conforme aux **probabilités d'inclusion**.
+-   Un vecteur $v \in \{0,1\}^N$ représentant l’échantillon tiré.
+-   Le plan de sondage résultant est :
+    -   **à taille fixe**,
+    -   **équilibré** (ou presque),
+    -   conforme aux **probabilités d'inclusion**.
 
----
+------------------------------------------------------------------------
 
 # Exemple illustratif
 
-```r
+``` r
 library(sampling)
 
 # Données simulées
@@ -157,37 +300,35 @@ s <- cube(X = X, pik = pi)
 print(s)  # vecteur d'inclusion 0/1
 ```
 
----
+------------------------------------------------------------------------
 
 # Illustration géométrique
 
 (Diagrammes SVG à insérer ici, représentant un cube avec déplacement de $\pi$ dans l'espace des contraintes. Chaque étape de l'algorithme modifie légèrement $\pi$ en conservant l'équilibre.)
 
----
+------------------------------------------------------------------------
 
 # Estimation de variance
 
-- Soit $\hat{t}_y = \sum_{k \in s} \frac{y_k}{\pi_k}$ l’estimateur de Horvitz-Thompson.
-- Sous un plan équilibré, une estimation approximative de sa variance est :
+-   Soit $\hat{t}_y = \sum_{k \in s} \frac{y_k}{\pi_k}$ l’estimateur de Horvitz-Thompson.
+-   Sous un plan équilibré, une estimation approximative de sa variance est :
 
-\[
-\hat{V}(\hat{t}_y) = \sum_{k \in U} \left(1 - \pi_k\right) \left(\frac{y_k}{\pi_k}\right)^2
-\]
+\[ \hat{V}(\hat{t}*y) =* \sum{k \in U} \left(1 - \pi\_k\right) \left(\frac{y_k}{\pi_k}\right)\^2 \]
 
-- Cette formule est valide **en approximation** (car le plan n’est pas exactement à second ordre connu).
-- Des méthodes plus fines existent par linéarisation ou bootstrap.
+-   Cette formule est valide **en approximation** (car le plan n’est pas exactement à second ordre connu).
+-   Des méthodes plus fines existent par linéarisation ou bootstrap.
 
----
+------------------------------------------------------------------------
 
 # Conclusion
 
-- Les plans équilibrés permettent de mieux exploiter les **informations auxiliaires**.
-- L’**algorithme du cube** est une méthode élégante et efficace pour les construire.
-- Il est utilisé dans de nombreux instituts statistiques, notamment pour les enquêtes avec pondération.
+-   Les plans équilibrés permettent de mieux exploiter les **informations auxiliaires**.
+-   L’**algorithme du cube** est une méthode élégante et efficace pour les construire.
+-   Il est utilisé dans de nombreux instituts statistiques, notamment pour les enquêtes avec pondération.
 
----
+------------------------------------------------------------------------
 
 # Pour aller plus loin
 
-- Deville, J.-C., & Tillé, Y. (2004). *Efficient balanced sampling: The cube method*. Biometrika, 91(4), 893-912.
-- Tillé, Y. (2020). *Sampling and Estimation from Finite Populations*. Wiley.
+-   Deville, J.-C., & Tillé, Y. (2004). *Efficient balanced sampling: The cube method*. Biometrika, 91(4), 893-912.
+-   Tillé, Y. (2020). *Sampling and Estimation from Finite Populations*. Wiley.
