@@ -10,6 +10,11 @@ format:
             renderer: katex
             scale: 0.75
             output: svg
+filters:
+  - webr
+webr:
+    packages: ['ggplot2', 'dplyr']
+
 ---
 
 # Introduction
@@ -75,6 +80,7 @@ Solution : Utilisation du **tirage réjectif**
 
 ------------------------------------------------------------------------
 
+# Le tirage réjectif
 
 ## Le tirage réjectif (ou poissonien conditionnel)
 
@@ -217,7 +223,7 @@ $$\pi_k = \mathbb{P}(k \in S) = p_k \text{ si } S \sim \text{p}_\text{rejectif}(
 
 ::: {.fragment}
 - Plus formellement, 
-$$\pi_{i j}=\pi_i \pi_j\left[1-\frac{\left(1-\pi_i\right)\left(1-\pi_j\right)}{d}+o\left(\frac{1}{d}\right)\right]$$ lorsque $d \to \infty$ où $\displaystyle d = \sum_{k \in U} {\pi_k} (1 - \pi_k)$.
+$\displaystyle \pi_{i j}=\pi_i \pi_j\left[1-\frac{\left(1-\pi_i\right)\left(1-\pi_j\right)}{d}+o\left(\frac{1}{d}\right)\right]$ lorsque $d \to \infty$ où $\displaystyle d = \sum_{k \in U} {\pi_k} (1 - \pi_k)$.
 :::
 
 ------------------------------------------------------------------------
@@ -235,7 +241,7 @@ $$\Delta_{ij} = \pi_{ij} - \pi_i \pi_j = 1-d^{-1}\left(1-\pi_i\right)\left(1-\pi
 \widehat{\mathbb{V}}_{\mathrm{SYG}}(\hat t_{y,\mathrm{HT}})
 &= -\tfrac{1}{2}\sum_{k\in\mathcal{S}}\sum_{\substack{l\in\mathcal{S}\\ l\neq k}}
 \left(\frac{y_k}{\pi_k}-\frac{y_l}{\pi_l}\right)^2 \frac{\Delta_{kl}}{\pi_{kl}} \\[6pt]
-&= \frac{n}{n-1}\sum_{k\in S}\bigl(1-\pi_k\bigr)\left(\frac{y_k}{\pi_k}-\widehat{R}\right)^2 \text{où}
+&= \frac{n}{n-1}\sum_{k\in S}\bigl(1-\pi_k\bigr)\left(\frac{y_k}{\pi_k}-\widehat{R}\right)^2 \text{où }
 \widehat{R}=\frac{\displaystyle\sum_{k\in S}\frac{y_k}{\pi_k}\bigl(1-\pi_k\bigr)}
 {\displaystyle\sum_{k\in S}\bigl(1-\pi_k\bigr)}.
 \end{align*}
@@ -274,6 +280,7 @@ Passage à la partie sur le tirage équilibré
 
 
 ------------------------------------------------------------------------
+# Les plans équilibrés 
 
 ## Vers les plans équilibrés
 
@@ -568,39 +575,102 @@ $\sum_{s \subset \mathcal{U}_\text{landing}} p_\text{landing}(s) C(s)$ soit mini
 
 ------------------------------------------------------------------------
 
-# Méthode du cube et package `sampling`
+## Méthode du cube et package `sampling`
 
-``` r
-library(sampling)
+```{webr-r}
+# Exemple : tirage par la méthode du cube avec les données MU284 du package sampling
+library("sampling")
 
-# Données simulées
+data(MU284)  # population de 284 entreprises
+head(MU284)
+
+# 2) Variables auxiliaires et variable d'intérêt -------------------
+# MU284 contient plusieurs variables : turnover, employees, profit, ...
+# On choisit comme variable d'intérêt : turnover
+# et comme auxiliaires : employees et profit
+str(MU285)
+Y <- MU284$TURNOVER
+X <- cbind(1, MU284$EMPLOYEES, MU284$PROFIT)
+
+N <- nrow(MU284)
+````
+
+##
+
+```{webr-r}
+# 3) Probabilités d'inclusion --------------------------------------
+n <- 50                      # taille d’échantillon souhaitée
+pi <- rep(n / N, N)          # probabilités égales (on pourrait les faire varier)
+
+# 4) Tirage par la méthode du cube ---------------------------------
 set.seed(123)
-N <- 6
-x <- data.frame(region = c(1, 1, 2, 2, 3, 3))
-X <- model.matrix(~ region, data = x)[,-1]  # Variables auxiliaires (2 colonnes)
-pi <- rep(3/N, N)  # Probabilités d'inclusion
-
-# Tirage par la méthode du cube
-s <- cube(X = X, pik = pi)
-print(s)  # vecteur d'inclusion 0/1
+s_cube <- samplecube(X, pi, method = 2)  # vecteur 0/1, longueur N
+table(s_cube)          # effectif de l'échantillon
 ```
 
 ------------------------------------------------------------------------
 
+## Vérification 
 
-# Estimation de variance
+```{webr-r}
+# 5) Estimation HT de la moyenne de Y ------------------------------
+HT_total <- sum(Y[s_cube == 1] / pi[s_cube == 1])
+HT_mean  <- HT_total / N
 
--   Soit $\hat{t}_y = \sum_{k \in s} \frac{y_k}{\pi_k}$ l’estimateur de Horvitz-Thompson.
--   Sous un plan équilibré, une estimation approximative de sa variance est :
+cat("Moyenne population =", mean(Y), "\\n")
+cat("Moyenne estimée (cube) =", HT_mean, "\\n")
 
-\[ \hat{V}(\hat{t}*y) =* \sum{k \in U} \left(1 - \pi\_k\right) \left(\frac{y_k}{\pi_k}\right)\^2 \]
+# 6) Vérification de l’équilibre -----------------------------------
+cibles   <- colSums(X)
+observes <- colSums(X[s_cube == 1, ] / pi[s_cube == 1])
+comp <- data.frame(variable = c("Intercept","EMPLOYEES","PROFIT"),
+                   cible = round(cibles,2),
+                   observe = round(observes,2),
+                   diff = round(observes - cibles,2))
+print(comp)
+```
 
--   Cette formule est valide **en approximation** (car le plan n’est pas exactement à second ordre connu).
--   Des méthodes plus fines existent par linéarisation ou bootstrap.
+## 
+```{webr-r}
+# 7) Comparaison avec un tirage aléatoire simple -------------------
+set.seed(123)
+s_srs <- sample(1:N, n, replace = FALSE)
+HT_total_srs <- sum(Y[s_srs] / pi[s_srs])
+HT_mean_srs  <- HT_total_srs / N
+
+cat("Moyenne estimée (SRS) =", HT_mean_srs, "\\n")
+```
+
+## Estimation de variance
+
+-   Soit $\hat{t}_{y,\text{HT}} = \sum_{k \in S} \frac{y_k}{\pi_k}$ l’estimateur de Horvitz-Thompson.
+-   Comment estimer la variance de $\hat{t}_{y,\text{HT}}$ ?
+- Utilisation des estimateurs à la *Horvitz-Thompson* (ou Sen-Yates-Grundy si taille fixe).
+    - Problème : la calcul des $\pi_{ij}$ est délicat. 
+
+- Travaux de @berger98 et @DT2000 : si le plan est à entropie maximale et équilibré sur $\{\textbf{x}_k\}$, $$\mathbb{V}(\hat{t}_{y,\text{HT}}) \approx \mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} | \hat{t}_{\textbf{x},\text{HT}} = t_\textbf{x})$$ 
+
+## 
+
+- Si par ailleurs, on suppose la normalité de $(\hat{t}_{y,\text{HT}}, \hat{t}_{\textbf{x},\text{HT}}^T)^T$ : $$\mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} | \hat{t}_{\textbf{x},\text{HT}} = t_\textbf{x}) \approx \mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} - (t_x - \hat{t}_{\textbf{x},\text{HT}})^T \beta)$$
+
+- La variance peut être approximée par :
+
+$$\mathbb{V}_{app}\left(\hat{t}_{y \text{HT}}\right)  =\sum_{k \in U} b_k\left(\frac{y_k}{\pi_k}-\frac{\mathbf{x}_k^{\top}}{\pi_k} \beta \right)^2, \\
+\text{ où } \beta  =\left(\sum_{k \in U} b_k \frac{\mathbf{x}_k}{\pi_k} \frac{\mathbf{x}_k^{\top}}{\pi_k}\right)^{-1} \sum_{k \in U} b_k \frac{\mathbf{x}_k}{\pi_k} \frac{y_k}{\pi_k}$$
+
+Plusieurs choix de $\beta$ sont possibles, par exemple :
+- $\beta_{1k} = \pi_k(1-\pi_k)$ 
+- $\beta_{2k} = \pi_k(1-\pi_k)\frac{N}{N-p}$ : permet de retrouver le SRS
+...
+
+
+## Estimation de variance basée sur la prise en compte de la phase de vol.
+
 
 ------------------------------------------------------------------------
 
-# Conclusion
+## Conclusion
 
 -   Les plans équilibrés permettent de mieux exploiter les **informations auxiliaires**.
 -   L’**algorithme du cube** est une méthode élégante et efficace pour les construire.
