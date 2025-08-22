@@ -276,7 +276,6 @@ paramètre $\binom{N}{n} p^n (1-p)^{N-n}$.
 :::
 
 
-Passage à la partie sur le tirage équilibré
 
 
 ------------------------------------------------------------------------
@@ -300,7 +299,7 @@ Passage à la partie sur le tirage équilibré
 
 ## Définition : plan équilibré
 
-Un plan est **équilibré** sur $\mathbf{x}$ si :
+Un plan est **équilibré** sur $\{\mathbf{x}_k\}$ si :
 
 $$
 \hat{t}_{\textbf{x}, \text{HT}} = \sum_{k \in S} \frac{\mathbf{x}_k}{\pi_k} = \sum_{k \in U} \mathbf{x}_k = t_\textbf{x}
@@ -337,7 +336,7 @@ Il n'existe pas d'échantillon tel que $\hat{t}_{\textbf{x}, \text{HT}} = t_\tex
 
 ## Idée générale
 
-Tirer un échantillon de taille fixe et équilibré en transformant progressivement le vecteur des probabilités d'inclusion d'ordre 1 $\pi = (\pi_1, \ldots, \pi_N)$ vers un vecteur d'inclusion $I = (I_1, \ldots, I_N)$.
+Tirer un échantillon équilibré en transformant progressivement le vecteur des probabilités d'inclusion d'ordre 1 $\pi = (\pi_1, \ldots, \pi_N)$ vers un vecteur d'inclusion $I = (I_1, \ldots, I_N)$.
 
 -   Étapes :
     1.  Phase de **vol** (*balancing flight*) : maintenir l’équilibrage.
@@ -359,11 +358,12 @@ Tirer un échantillon de taille fixe et équilibré en transformant progressivem
 Objectif : construire un vecteur $\displaystyle \mathbf{I} = (I_1, \ldots, I_N) \in \{0,1\}^N$ tel que :
 
 - $\mathbb{E}(I_k) = \pi_k$ (respect des probabilités d'inclusion d'ordre 1),
-- $\displaystyle \sum_{k \in U} \frac{\textbf{x}_k}{\pi_k} I_k  = \sum_{k \in U} x_k$ (respect de l'équilibrage).
+- $\displaystyle \sum_{k \in U} \frac{\textbf{x}_k}{\pi_k} I_k  = \sum_{k \in U} \textbf{x}_k$ (respect de l'équilibrage).
 :::
 
 ::: {.fragment}
-Transformation séquentielle
+Transformation séquentielle :
+$$\pi^{(0)} \to \pi^{(1)} \to \ldots \to \mathbf{I}$$
 :::
 
 ------------------------------------------------------------------------
@@ -413,8 +413,8 @@ f
 #| echo: false
 #| fig-align: center
 #| fig-cap: "Cas où N = 3"
-f2 <- plot_cube_plan_vecteurs(p1, list(q1, q2, q3), plane_normal,
- affichage_fleche = FALSE, affichage_hyperplan = TRUE)
+f2 <- plot_cube_plan_vecteurs(p1, list(), plane_normal,
+ affichage_fleche = TRUE, affichage_hyperplan = TRUE)
 f2
 ```
 :::
@@ -482,7 +482,7 @@ f2
 -  Ici : 
     - $X = (\frac{2}{3}, \frac{2}{3}, \frac{2}{3})$
     - $A = (1, 1, 1)$
-    - $\color{red}{(-0.57, 0.78, -0.21) \in \text{Ker}(A)}$
+    - $\color{red}{(-0.57, 0.78, -0.21)^T \in \text{Ker}(A)}$
 
 - $\lambda_1 \approx 0.427$ et $\lambda_2 \approx 0.584$
 
@@ -531,6 +531,49 @@ f2
 
 ------------------------------------------------------------------------
 
+
+## Phase de vol : à chaque étape $t$ - c
+
+::: columns
+::: {.column width="50%"}
+::: {style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; overflow: hidden;"}
+```{r}
+#| echo: false
+#| fig-align: center
+#| fig-cap: "Etape a"
+
+pi_update <- c(-0.57, 0.78, -0.21) * 0.427
+pi_update2 <- c(-1, 0, 1)*0.43
+
+f2 <- plot_cube_plan_vecteurs(p1, list(pi_update, pi_update2), plane_normal,
+ affichage_fleche = TRUE, affichage_hyperplan = TRUE, ligne_point = p1 + pi_update, 
+ ligne_vecteur = pi_update2
+)
+f2
+```
+:::
+:::
+
+::: {.column width="50%"}
+- $\pi(t+1) = (0.43, 1, 0.57)$ est retenu
+
+- Recherche d'un vecteur dans $u(t+1) \in \text{Ker}(A)$ tel que $u_2(t+1) = 0$
+
+- Exemple : $\color{red}{u(t+1) = (-1, 0, 1)}$
+
+- Calcul de $\lambda_1$ et $\lambda_2$ :
+    - $\lambda_1 \approx 0.43$
+    - $\lambda_2 \approx 0.57$
+:::
+:::
+
+------------------------------------------------------------------------
+
+# Quelques remarques sur l'algorithme
+
+- Mettre une remarque sur le fait que si on touche une face, on y bouge plus.
+
+------------------------------------------------------------------------
 
 ## Cas où la phase de vol ne suffit pas
 
@@ -652,17 +695,21 @@ cat("Moyenne estimée (SRS) =", HT_mean_srs, "\\n")
 
 ## 
 
-- Si par ailleurs, on suppose la normalité de $(\hat{t}_{y,\text{HT}}, \hat{t}_{\textbf{x},\text{HT}}^T)^T$ : $$\mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} | \hat{t}_{\textbf{x},\text{HT}} = t_\textbf{x}) \approx \mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} - (t_x - \hat{t}_{\textbf{x},\text{HT}})^T \beta)$$
+- Si par ailleurs, on suppose la normalité de $(\hat{t}_{y,\text{HT}}, \hat{t}_{\textbf{x},\text{HT}}^T)^T$ : $$\mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} | \hat{t}_{\textbf{x},\text{HT}} = t_\textbf{x}) \approx \mathbb{V}_{p_\text{Poisson}}(\hat{t}_{y,\text{HT}} - (t_\textbf{x} - \hat{t}_{\textbf{x},\text{HT}})^T \beta)$$
 
 - La variance peut être approximée par :
 
 $$\mathbb{V}_{app}\left(\hat{t}_{y \text{HT}}\right)  =\sum_{k \in U} b_k\left(\frac{y_k}{\pi_k}-\frac{\mathbf{x}_k^{\top}}{\pi_k} \beta \right)^2, \\
 \text{ où } \beta  =\left(\sum_{k \in U} b_k \frac{\mathbf{x}_k}{\pi_k} \frac{\mathbf{x}_k^{\top}}{\pi_k}\right)^{-1} \sum_{k \in U} b_k \frac{\mathbf{x}_k}{\pi_k} \frac{y_k}{\pi_k}$$
 
-Plusieurs choix de $\beta$ sont possibles, par exemple :
+Plusieurs choix de $\beta$ proposés par @DT2005 :
+
 - $\beta_{1k} = \pi_k(1-\pi_k)$ 
 - $\beta_{2k} = \pi_k(1-\pi_k)\frac{N}{N-p}$ : permet de retrouver le SRS
 ...
+
+## Estimateur de la variance 
+
 
 
 ## Estimation de variance basée sur la prise en compte de la phase de vol.
