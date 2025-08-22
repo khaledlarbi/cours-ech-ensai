@@ -1,0 +1,369 @@
+---
+title: "Le partage des poids"
+author: "Khaled Larbi"
+lang: fr
+date: 9/25/2025
+date-format: "DD MMM YYYY"
+format: 
+    clean-revealjs:
+        math:
+            renderer: katex
+            scale: 0.75
+            output: svg
+filters:
+  - webr
+webr:
+    packages: ['ggplot2', 'dplyr']
+
+---
+# Cours : La méthode du partage des poids en sondage
+
+### Résumé et objectifs
+
+* Cette note méthodologique a pour objectif de décrire rapidement la méthode du partage des poids et ses contextes d'application.
+* Elle aborde également le positionnement de cette méthode par rapport aux autres traitements post-collecte.
+* **Objectifs du cours :**
+    * Comprendre le cadre théorique et les enjeux du partage des poids.
+    * Identifier les contextes d'application spécifiques (sondage indirect, bases multiples, panels).
+    * Savoir calculer les poids pour obtenir un estimateur sans biais.
+
+---
+
+### Plan du cours
+
+* **Partie I:** Contexte et problématique
+    * L'exemple de la mairie d'Aurillac
+    * Constat d'une erreur d'estimation
+    * D'où vient le problème ?
+* **Partie II:** Cadre théorique et conceptuel
+    * Le sondage indirect
+    * Les notations clés
+    * L'intuition derrière le partage des poids
+* **Partie III:** Les contextes d'application
+    * Sondage indirect
+    * Bases de sondage multiples
+    * Enquêtes répétées dans le temps (panels)
+* **Partie IV:** Conclusion
+
+---
+
+### Contexte de l'étude (Cas pratique - 1/2)
+
+* **Acteur :** Direction de l'aménagement et de l'environnement de la mairie d'Aurillac.
+* **Contexte :** Mise en place d'une ligne de bus pour limiter le trafic en centre-ville.
+* **Objectifs :**
+    * Évaluer la fréquentation de la nouvelle ligne de bus.
+    * Connaître les heures de pointe.
+* **Moyens :** Réalisation d'une enquête auprès de la population.
+
+---
+
+### Contexte de l'étude (Cas pratique - 2/2)
+
+* **Problème :** Comment obtenir une base de sondage de la population d'Aurillac ?
+* **Hypothèses :**
+    * Tous les ménages s'approvisionnent au marché au moins une fois par semaine.
+    * Une seule personne par ménage se rend au marché.
+* **Solution :** Mener une enquête auprès des ménages pendant une semaine dans les 4 marchés de la ville (mercredi à samedi).
+
+---
+
+### Description de l'enquête
+
+* **Population d'intérêt ($U^B$) :** Les 8 000 ménages d'Aurillac.
+* **Base de sondage ($U^A$) :** Les "jours × ménages".
+* **Plan de sondage :** Interroger 1 ménage sur 10 à chaque marché.
+* **Non-réponse :** Hypothèse de réponse de tous les ménages.
+* **Temporalité :** Enquête sur les 4 jours de marché.
+* **Questions clés :**
+    * "Combien de personnes de votre ménage utiliseraient cette nouvelle ligne de bus ?"
+    * "À quels horaires ces personnes utiliseraient la nouvelle ligne de bus ?"
+
+---
+
+### Résultats de l'enquête
+
+| Date du marché | Nombre d'enquêtés | Estimation (ménages) |
+| :--- | :---: | :---: |
+| Mercredi | 400 | 4 000 |
+| Jeudi | 400 | 4 000 |
+| Vendredi | 400 | 4 000 |
+| Samedi | 400 | 4 000 |
+
+* Estimation totale: 16 000 ménages intéressés...
+* ...alors qu'il n'y a que 8 000 ménages à Aurillac !
+
+---
+
+### Le constat d'une erreur
+
+* On a une estimation de 16 000 ménages.
+* La vraie population est de 8 000 ménages.
+* **Constat :** L'estimation est sur-évaluée !
+
+---
+
+### D'où vient le problème d'estimation ?
+
+* Une surestimation du niveau : 16 000 personnes intéressées au lieu de 6 000 en réalité.
+* Une surestimation de la structure : 1 individu intéressé par ménage estimé (16 000 / 16 000) au lieu de 0,75 en réalité (6 000 / 8 000).
+
+---
+
+### La surestimation en niveau
+
+* La surestimation est due au fait que certains ménages se rendent plusieurs fois au marché dans la semaine.
+* Leurs réponses sont comptées en double, voire en quadruple, s'ils sont interrogés plusieurs fois.
+
+---
+
+### La surestimation en structure
+
+* La surestimation en structure s'explique par le fait que les ménages qui fréquentent le plus le marché sont ceux qui sont les plus intéressés par l'objet de l'enquête (les transports).
+* Ainsi, le plan de sondage ne donne pas la même chance à tous les ménages d'être interrogés.
+
+---
+
+### En un mot...
+
+* On peut "attraper un ménage" par plusieurs jours de marché.
+* Les calculs de probabilités d'inclusion des ménages sont donc faux avec la méthode d'estimation naïve.
+
+---
+
+### Comment résoudre le problème ?
+
+* **Solution 1 :** Adapter le questionnaire en ajoutant la question "Combien de fois vous approvisionnez-vous en marché dans la semaine ?".
+* **Solution 2 :** Ajouter la question "Est-ce la première fois cette semaine que vous faites le marché ?" et exclure les ménages qui répondent "Non".
+
+---
+
+### Les solutions comparées
+
+* **Solution 2 (Exclusion) :**
+    * Génère artificiellement des "hors-champ".
+    * Réduit la taille de l'échantillon exploitable.
+    * Rarement utilisée en pratique.
+* **Solution 1 (Partage des poids) :**
+    * Permet d'exploiter un échantillon plus riche.
+    * Nécessite un traitement statistique spécifique : **le partage des poids**.
+
+---
+
+### Le partage des poids, une solution conceptuelle
+
+* Le partage des poids offre un cadre conceptuel qui intègre plusieurs enjeux de conception (base de sondage, questionnaire, champ d'enquête) pour permettre des estimations sans biais.
+* La question centrale est : **"de combien de manières différentes pourrais-je atteindre un ménage ?"**.
+
+---
+
+### Le cadre théorique et les contextes d'application
+
+* En statistique d'enquête, il arrive que l'unité d'observation diffère de l'unité d'échantillonnage.
+* L'échantillon final souhaité est le résultat de la sélection d'un ou plusieurs échantillons intermédiaires reliés aux unités finales.
+* Dans ces situations, le partage des poids est la procédure de référence pour calculer les pondérations et obtenir un estimateur sans biais.
+
+---
+
+### Le sondage indirect
+
+* Le sondage indirect est le cadre d'application le plus naturel de la méthode.
+* Il consiste à sélectionner un échantillon ($s^A$) dans une population ($U^A$) pour produire une estimation sur une population cible ($U^B$) en s'appuyant sur les liens qui existent entre les deux populations.
+* **Exemple classique :** "parents-enfants". On tire un échantillon de parents ($U^A$) pour interroger leurs enfants ($U^B$).
+
+---
+
+### Les populations en sondage indirect
+
+* **Population d'échantillonnage ($U^A$) :** La population dans laquelle on tire l'échantillon initial (ex: parents, ou "jour x ménage" au marché).
+* **Population d'intérêt ($U^B$) :** La population sur laquelle on veut faire des estimations (ex: enfants, ou ménages d'Aurillac).
+* **Échantillon initial ($s^A$) :** L'échantillon tiré dans la population $U^A$.
+* **Échantillon d'observation ($\Omega^B$) :** L'ensemble des unités de la population $U^B$ qui ont été interrogées.
+
+---
+
+### L'échantillon d'observation
+
+* L'échantillon $\Omega^B$ est l'ensemble des unités $i$ de $U^B$ pour lesquelles il existe au moins une unité $j$ de l'échantillon $s^A$ avec laquelle elle a un lien.
+* Formellement : $\Omega^B = \{ i \in U^B \ | \ \exists j \in s^A \text{ tel que } L_{j,i} > 0 \}$.
+
+---
+
+### Les liens
+
+* Un lien ($L_{j,i}$) existe entre une unité $j$ de la population $U^A$ et une unité $i$ de la population $U^B$ si, quand on tire $j$, on interroge $i$.
+* On définit $L_{j,i}$ comme une variable binaire :
+    * $L_{j,i} = 1$ s'il y a un lien entre l'unité $j$ et l'unité $i$.
+    * $L_{j,i} = 0$ sinon.
+* Dans l'exemple "parents-enfants", un lien existe entre un parent et son enfant.
+* Dans l'exemple du marché, un lien existe entre un "jour x ménage" et le ménage en question.
+
+---
+
+### Le nombre de liens
+
+* On note $L_i$ le nombre total de liens de l'unité $i$ (dans $U^B$) avec la base de sondage initiale ($U^A$).
+* $L_i = \Sigma_{j=1}^{N^A} L_{ij}$.
+* Ce nombre de liens est comptabilisé sur l'ensemble de la population $U^A$, et non pas seulement sur l'échantillon $s^A$.
+
+---
+
+### L'intuition du partage des poids
+
+* L'idée est d'attribuer des liens entre les unités de la population $U^A$ et celles de la population $U^B$.
+* Grâce à ces liens, on va pouvoir passer du poids de tirage des unités de l'échantillon initial ($s^A$) au poids de l'échantillon d'observation ($\Omega^B$).
+
+---
+
+### L'estimateur naïf
+
+* Pour estimer le total $Y^B$ à partir des valeurs $y_i$ mesurées sur $\Omega^B$, on utilise un estimateur de la forme $\hat{Y}^B = \sum_{i \in \Omega^B} w_i y_i$.
+* Dans un sondage direct, le poids $w_i$ serait l'inverse de la probabilité d'inclusion $\pi_i$.
+* Dans le cas du sondage indirect, la probabilité d'inclusion des unités de l'échantillon $\Omega^B$ est souvent impossible à déterminer.
+
+---
+
+### L'estimateur avec partage des poids
+
+* On dispose seulement du poids de sondage de l'unité $j$ dans l'échantillon initial $s^A$, défini comme l'inverse de la probabilité d'inclusion $\pi_j$ : $d_j = 1 / \pi_j$.
+* L'estimateur sans biais résultant de la méthode du partage des poids s'écrit alors :
+    $\hat{Y}^B = \sum_{i \in \Omega^B} w_i y_i$.
+* Avec $w_i = \sum_{j \in s^A} d_j \frac{L_{ij}}{L_i}$.
+
+---
+
+### Explication de la formule des poids
+
+* $w_i$ est la somme des poids des unités $j$ tirées (dans $s^A$) qui ont un lien avec l'unité $i$ (dans $\Omega^B$).
+* Cette somme est pondérée par le pourcentage de liens de $i$ avec l'unité $j$.
+* Plus le nombre de liens ($L_i$) est élevé, plus l'unité $i$ a une forte probabilité d'être sélectionnée, et par conséquent son poids ($w_i$) diminue.
+
+---
+
+### La condition d'un estimateur sans biais
+
+* L'estimateur $\hat{Y}^B$ est sans biais si et seulement s'il n'y a pas de défaut de couverture.
+* Cela signifie que chaque unité finale (dans $U^B$) doit être reliée à au moins une unité intermédiaire (dans $U^A$).
+
+---
+
+### Partage des poids vs. Probabilité d'inclusion
+
+* Pourquoi ne pas calculer directement la probabilité d'inclusion des unités de $U^B$ ($\pi_i^B$) ?
+* Le calcul de $\pi_i^B$ est souvent très complexe, voire impossible.
+* Il nécessite de connaître toutes les unités de $U^A$ qui sont liées à $i$, même celles qui n'ont pas été sélectionnées.
+* Dans l'exemple du marché, $\pi_i^B = 1 - (9/10)^t$ où $t$ est le nombre de fois où le ménage se rend au marché dans la semaine. Ce calcul est théorique mais difficile en pratique.
+
+---
+
+### Sondage indirect : l'exemple parents-enfants
+
+* **Population $U^A$ :** Parents.
+* **Population $U^B$ :** Enfants.
+* **Liens :** Relations de filiation (un parent est lié à son ou ses enfants).
+* On tire un échantillon de parents et on interroge tous leurs enfants.
+* Le poids de chaque enfant dépendra du poids de ses parents et du nombre total de ses parents dans la population.
+
+---
+
+### Sondage indirect : l'exemple du marché
+
+* **Population $U^A$ :** Les "jour x ménage" (unités de passage au marché).
+* **Population $U^B$ :** Les ménages.
+* **Liens :** Un lien existe entre un "jour x ménage" et le ménage en question.
+* Le poids d'un ménage interrogé est la somme des poids des "jour x ménage" tirés qui lui sont liés, divisée par le nombre total de jours où ce ménage se rend au marché dans la semaine.
+
+---
+
+### Contexte d'application 2 : Bases de sondage multiples
+
+* On réalise plusieurs tirages d'échantillons dans plusieurs bases de sondage dont l'intersection n'est pas vide.
+* C'est une méthode courante pour pallier un défaut de couverture.
+* Si on utilise un estimateur naïf (somme des estimations de chaque base), on sur-estimerait le total à cause des doubles comptes.
+
+---
+
+### Bases de sondage multiples : les liens
+
+* Les unités des différentes bases de sondage constituent la population intermédiaire $U^A$.
+* La population d'intérêt $U^B$ est la population couverte par ces bases.
+* Le partage des poids permet de construire un estimateur sans biais en fusionnant les échantillons et en supprimant les doublons.
+* Dans ce cas, le nombre de liens ($L_i$) correspond au nombre de bases dans lesquelles l'unité $i$ aurait pu être échantillonnée.
+
+---
+
+### Bases de sondage multiples : formule des poids
+
+* L'estimateur sans biais est de la forme : $\hat{Y}^B = \sum_{i \in \Omega^B} (\sum_{j \in s_1 \cup s_2} d_j \frac{L_{ij}}{L_i}) y_i$.
+* Où $d_j = w_{j,1} I_{j \in s_1} + w_{j,2} I_{j \in s_2}$.
+* Et $L_i = \sum_{j \in U_1 \cup U_2} L_{ij}$.
+* Le poids de sondage final des unités échantillonnées dans les deux bases est la somme de leurs poids dans chaque base divisée par deux.
+
+---
+
+### Contexte d'application 3 : Enquêtes répétées dans le temps
+
+* Il s'agit d'exploiter des échantillons totalement ou partiellement panélisés.
+* Un panel est un échantillon dont les unités sont interrogées plusieurs fois.
+* Il représente la population au moment du tirage initial.
+* Son utilisation pour une approche transversale (estimer un paramètre à une date courante) est complexe car le panel ne représente pas la population courante.
+* Le partage des poids peut être appliqué pour corriger cette problématique.
+
+---
+
+### Applications à l'INSEE : Enquêtes ménages
+
+* **Bases de sondage multiples :** Enquêtes "Cadre de Vie et Sécurité", "Budget de Famille".
+* **Panels rotatifs :** Enquêtes "Conditions de Travail", "Enquête Emploi en Continu", "Statistiques sur les Ressources et les Conditions de Vie", "Histoire de Vie et Patrimoine".
+* **Sondage indirect :** Enquêtes sur les sans-domicile, "Trajectoires et Origines", "Modes de Garde".
+
+---
+
+### Applications à l'INSEE : Enquêtes entreprises
+
+* **Bases de sondage multiples :** Enquête Associations.
+* **Sondage indirect :** Mise à jour des contours des entreprises dans Esane, enquêtes sur les sous-traitants.
+* **Note :** Les panels rotatifs sont souvent gérés par d'autres méthodes (numéro hexal, coordination d'échantillons) qui ne nécessitent pas de partage des poids.
+
+---
+
+### Les enjeux du partage des poids
+
+* Le partage des poids garantit un estimateur sans biais.
+* Toutefois, les poids ainsi calculés ne sont pas nécessairement optimaux en termes de variance.
+* La problématique du calage sur marges est plus complexe dans ce cadre.
+* Le partage des poids est la solution statistique appropriée lorsque les probabilités d'inclusion des unités d'intérêt sont inconnues ou difficiles à calculer.
+
+---
+
+### Conclusion
+
+* La méthode du partage des poids est une procédure robuste pour calculer des pondérations et produire des estimations sans biais.
+* Elle est essentielle lorsque l'unité d'observation diffère de l'unité d'échantillonnage.
+* Elle s'applique principalement au sondage indirect, aux bases multiples et à l'exploitation de panels.
+* L'idée est de "partager" le poids de l'unité tirée de la base de sondage avec les unités d'intérêt qui lui sont liées.
+
+---
+
+### Pour aller plus loin
+
+* **Référence principale :** Article de Deville et Lavallée (2006) qui donne les fondements de la méthode généralisée du partage des poids.
+* Autres travaux de Hartley (1962, 1974) sur les bases de sondage multiples.
+* Ouvrages de Pierre Lavallée, "Le sondage indirect" et "Indirect Sampling".
+
+---
+
+### Exercices pratiques et discussion
+
+* **Slide 39:** Reprenons l'exemple d'Aurillac. Un ménage se rend au marché les 4 jours de la semaine. Quel est son poids final si le poids de sondage initial de chaque "jour x ménage" est de 10 ?
+* **Slide 40:** **Réponse :** Le ménage est sélectionnable 4 fois. Son poids sera de $(10+10+10+10) / 4 = 10$.
+* **Slide 41:** Un autre ménage ne se rend au marché que le mercredi. S'il est tiré, quel est son poids final ?
+* **Slide 42:** **Réponse :** Le ménage n'est sélectionnable qu'une seule fois. S'il est tiré, son poids est de 10.
+* **Slide 43:** Comment la formule du partage des poids ($w_i = \sum_{j \in s^A} d_j \frac{L_{ij}}{L_i}$) s'applique-t-elle à ces exemples ?
+* **Slide 44:** Cas 1 : $w_i = d_{mercredi} \times \frac{1}{4} + d_{jeudi} \times \frac{1}{4} + d_{vendredi} \times \frac{1}{4} + d_{samedi} \times \frac{1}{4}$. Si les 4 sont tirés.
+* **Slide 45:** Cas 2 : Si un seul est tiré, par exemple le mercredi, $w_i = d_{mercredi} \times \frac{1}{4}$.
+* **Slide 46:** Pourquoi la formule de Lavallée donne un résultat différent de l'intuition ? Explication des probabilités d'inclusion et de l'estimateur exact.
+* **Slide 47:** Discussion : Non-réponse et partage des poids. Comment gérer la non-réponse dans un contexte de sondage indirect ?
+* **Slide 48:** Discussion : Quelles sont les limites de la méthode ? Le coût de collecte des informations sur les liens.
+* **Slide 49:** Discussion : Partage des poids et multimode. Comment la méthode s'adapte-t-elle aux enquêtes multimodales (téléphone, face-à-face, internet) ?
+* **Slide 50:** Questions / Réponses.
